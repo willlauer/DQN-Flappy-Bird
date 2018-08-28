@@ -22,15 +22,8 @@ class Display:
 		# Appearance shouldn't really matter, but if it does we can add an
 		# something to define order, like a counter
 		# 'name' : (img, (blitAtX, blitAtY))
+		self.pipeIDs = [] # eh? could help 
 		self.blits = {} 
-
-
-	def blitAll(self):
-		'''
-		Blit everything in (self.permanentBlits)U(self.tempBlits)
-		'''
-		for blit in list(self.blits.values())
-			self.screen.blit(blit[0], blit[1])
 
 
 	def removePipe(self, pipeCounter):
@@ -41,34 +34,57 @@ class Display:
 		del self.tempBlits['TopPipe' + str(pipeCounter)]
 		del self.tempBlits['BotPipe' + str(pipeCounter)]
 
-
-
-	def addNewPipe(self, y1, y2, pipeCounter):
+	def slideScreen(self):
 		'''
-		y1: the bottom coordinate of the top pipe piece
-		y2: the top coordinate of the bottom pipe piece
-		pipeCounter: which pipe number this is
+		Analagous to the slideScreen method in game.py. Update the x 
+		coordinates of each of our pipes
 		'''
-		topPipeLength = y1
-		botPipeLength = config.screenHeight - y2
+		for pipeID in self.pipeIDs:
+			
+			# So we can update our blits
+			topID = 'TopPipe' + str(pipeID)
+			botID = 'BotPipe' + str(pipeID)
+			
+			# orig top img, coords
+			# orig bot img, coords
+			otImg, otCoords = self.blits[topID][0], self.blits[topID][1]
+			obImg, obcoords = self.blits[botID][0], self.blits[botID][1]
 
+			# update the column coordinate of the pipes corresponding to ID
+			self.blits[topID] = (otImg, (otCoords[0], otCoords[1] - util.screenStep))
+			self.blits[botID] = (obImg, (obCoords[0], obCoords[1] - util.screenStep))
+
+			
+
+
+		
+
+
+	def addNewPipe(self, pipeID, coords):
+		'''
+		pipeID = int
+		coords = topCoords, botCoords
+		topCoords = x1, y1, x2, y2
+		botCoords = x3, y3, x4, y4
+		'''
+		topCoords, botCoords = coords
+		topPipeLength = topCoords[2] - topCoords[0]
+		botPipeLength = botCoords[2] - botCoords[0]
+
+		# Create new copies of our pipe surfaces and scale them to have the 
+		# desired lengths, with constant width
 		newTopPipe = self.topPipe.copy()
 		newTopPipe = pygame.transform.scale(newTopPipe, (config.pipeWidth, topPipeLength))
-
 		newBotPipe = self.botPipe.copy()
 		newBotPipe = pygame.transform.scale(newBotPipe, (config.pipeWidth, botPipeLength))
 
-		# At the moment, we're just going to make new elements pop up towards the edge
-		# of the screen. To make it look nicer, we should have a buffer zone where we
-		# initially init blit this stuff, then slowly slide it onto the screen
-		colCoord = config.screenWidth - pipeWidth
-
-		topCoords = (0, colCoord)
-		botCoords = (config.screenHeight - botPipeLength, colCoord)
+		blitTopCoords = topCoords[0], topCoords[1]
+		blitBotCoords = botCoords[0], botCoords[1]
 
 		# Initialize the tuple of img, coords that we'll use to blit this to the screen
-		self.tempBlits['TopPipe' + str(pipeCounter)] = (newTopPipe, topCoords)
-		self.tempBlits['BotPipe' + str(pipeCounter)] = (newBotPipe, botCoords)
+		# Add them to the dict of things to blit to the screen
+		self.tempBlits['TopPipe' + str(pipeID)] = (newTopPipe, blitTopCoords)
+		self.tempBlits['BotPipe' + str(pipeID)] = (newBotPipe, blitBotCoords)
 	
 
 
@@ -82,7 +98,16 @@ class Display:
 		self.blits['Bird'] = newBird
 
 
+	def update(self):
+		'''
+		After the game has called methods in this class to make changes to the 
+		display, blit all of them to the screen and flip to make them visible
+		'''
+		for blit in list(self.blits.values()):
+			self.screen.blit(blit[0], blit[1])
+		pygame.display.flip()
 
+			
 
 
 

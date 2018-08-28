@@ -18,6 +18,8 @@ screenHeight = None
 
 pipeWidth = None 
 
+pipeSeparation = None # How much space we leave bw the top and bottom pipes
+
 avatarWidth = None
 avatarHeight = None
 
@@ -31,6 +33,8 @@ hopVelocity = None # The initial velocity applied when the bird hops
 # Treat each pixel as being one meter, to simplify physics
 
 timeStep = None # How much time passes with each step of our display
+
+pipeInterval = None # Add a new pipe each 'pipeInterval' time steps
 
 
 
